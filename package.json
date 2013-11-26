@@ -1,0 +1,30 @@
+{
+  "name": "cql-client",
+  "version": "0.0.0",
+  "description": "cassandra CQL driver uses Native Protocol v2",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "cassandra", "cql", "cql3"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suguru/cql-client.git"
+  },
+  "dependencies": {
+    "cql-protocol": "0.1.1",
+    "async": "0.2.9",
+    "node-uuid": "~1.4.0",
+    "ipaddr.js": "~0.1.1",
+    "jsbn": "0.0.0"
+  },
+  "devDependencies": {
+    "expect.js": "0.2.0"
+  },
+  "engines": {"node": ">=0.10.0"},
+  "author": "Suguru Namura (https://github.com/suguru/)",
+  "contributors": [],
+  "license": "MIT"
+}
