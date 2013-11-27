@@ -1,6 +1,8 @@
 cql-client
 ==========
 
+[![Build Status](https://travis-ci.org/suguru/cql-client.png)](https://travis-ci.org/suguru/cql-client)
+
 Node.js driver for cassandra. The driver uses Cassandra Binary Protocol v2.
 
 *NOTICE* This module is NOT ready for production use.
