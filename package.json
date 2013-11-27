@@ -21,7 +21,8 @@
     "jsbn": "0.0.0"
   },
   "devDependencies": {
-    "expect.js": "0.2.0"
+    "expect.js": "0.2.0",
+    "mocha": "1.14.0"
   },
   "engines": {"node": ">=0.10.0"},
   "author": "Suguru Namura (https://github.com/suguru/)",
