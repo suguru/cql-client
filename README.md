@@ -5,13 +5,16 @@ cql-client
 
 Node.js driver for cassandra. The driver uses Cassandra Binary Protocol v2.
 
-*NOTICE* This module is NOT ready for production use.
+**NOTICE** This module is *NOT* ready for production use yet.
 
 Features
 ----------
 
-- CQL binary protocol
-- Auto reconnect failed connection
+- CQL binary protocol v2
+- Auto detection for cluster peers
+- Auto reconnecting connections
+- Listening events from cassandra
+- Paging large result set
 
 Quick start
 ----------
@@ -39,7 +42,9 @@ TODO
 
 License
 ----------
+
 See [LICENSE](LICENSE)
+
 Copyright (C) Suguru Namura
 
 [cql-protocol]: <https://github.com/yukim/cql-protocol/>
