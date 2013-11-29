@@ -1,4 +1,4 @@
-/* global describe,it,before,beforeEach,afterEach */
+/* global describe,it,before,after,beforeEach,afterEach */
 
 var Connection = require('../lib/connection');
 var expect = require('expect.js');
@@ -10,8 +10,11 @@ describe('Connection', function() {
   var conn;
 
   before(function(done) {
-    conn = new Connection();
-    conn.connect(done);
+    conn = new Connection({
+      reconnectInterval: 500
+    });
+    conn.connect();
+    conn.once('connect', done);
   });
 
   before(function(done) {
@@ -30,7 +33,7 @@ describe('Connection', function() {
     });
   });
 
-  before(function(done) {
+  beforeEach(function(done) {
     conn.query("use cql_client", done);
   });
 
@@ -50,7 +53,7 @@ describe('Connection', function() {
     });
   });
 
-  afterEach(function(done) {
+  after(function(done) {
     conn.close(done);
   });
 
@@ -69,6 +72,15 @@ describe('Connection', function() {
     it('should connected to the server', function(done) {
       expect(conn).to.be.ok();
       done();
+    });
+
+    it('should auto reconnect to the server', function(done) {
+      conn.setAutoReconnect(true);
+      conn.once('reconnecting', function() {
+        conn.once('connect', done);
+      });
+      // force close to simulate auto reconnect
+      conn._socket.end();
     });
 
   });
