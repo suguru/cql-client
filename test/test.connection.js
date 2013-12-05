@@ -1,4 +1,4 @@
-/* global describe,it,before,after,beforeEach,afterEach */
+/* global describe,it,beforeEach,afterEach */
 
 var Connection = require('../lib/connection');
 var expect = require('expect.js');
@@ -9,7 +9,7 @@ describe('Connection', function() {
 
   var conn;
 
-  before(function(done) {
+  beforeEach(function(done) {
     conn = new Connection({
       reconnectInterval: 500
     });
@@ -17,11 +17,11 @@ describe('Connection', function() {
     conn.once('connect', done);
   });
 
-  before(function(done) {
+  beforeEach(function(done) {
     conn.query('drop keyspace if exists cql_client', done);
   });
 
-  before(function(done) {
+  beforeEach(function(done) {
     conn.query("create keyspace cql_client with replication={'class':'SimpleStrategy','replication_factor':1}", function(err, schema) {
       if (err) {
         return done(err);
@@ -53,7 +53,7 @@ describe('Connection', function() {
     });
   });
 
-  after(function(done) {
+  afterEach(function(done) {
     conn.close(done);
   });
 
@@ -81,6 +81,23 @@ describe('Connection', function() {
       });
       // force close to simulate auto reconnect
       conn._socket.end();
+    });
+
+    it('should throw error if connect twice', function(done) {
+      try {
+        conn.connect();
+      } catch (e) {
+        done();
+      }
+    });
+
+    it('should close twice', function(done) {
+      conn.setAutoReconnect(false);
+      conn.close(function() {
+        conn.close(function() {
+          conn.connect(done);
+        });
+      });
     });
 
   });
@@ -225,6 +242,7 @@ describe('Connection', function() {
       var uuid1 = uuid.v4();
       var uuid2 = uuid.v4();
       var uuid3 = uuid.v4();
+      var uuid4 = uuid.v4();
 
       conn.batch([
         // normal
@@ -235,7 +253,8 @@ describe('Connection', function() {
         {
           query: 'INSERT INTO table1 (id,value1,value2) values (?,?,?)',
           values: [types.uuid.serialize(uuid3), types.text.serialize('batch3'), types.int.serialize(2003)]
-        }
+        },
+        "INSERT INTO table1 (id,value1,value2) values ("+uuid4+",'batch4',2004)",
       ], function(err) {
         if (err) {
           return done(err);
@@ -245,7 +264,7 @@ describe('Connection', function() {
             return done(err);
           }
           expect(rs).to.be.ok();
-          expect(rs.rows).to.have.length(3);
+          expect(rs.rows).to.have.length(4);
           expect(findRow(rs, uuid1)).to.eql(
             { id: uuid1, value1: 'batch1', value2: 2001 }
           );
@@ -254,6 +273,9 @@ describe('Connection', function() {
           );
           expect(findRow(rs, uuid3)).to.eql(
             { id: uuid3, value1: 'batch3', value2: 2003 }
+          );
+          expect(findRow(rs, uuid4)).to.eql(
+            { id: uuid4, value1: 'batch4', value2: 2004 }
           );
           done();
         });
@@ -330,14 +352,19 @@ describe('Connection', function() {
         if (err) {
           return done(err);
         }
+        var success = true;
         conn.on('event', function(event) {
           expect(event.type).to.eql('SCHEMA_CHANGE');
           expect(event.typeOfChange).to.eql('CREATED');
           expect(event.keyspace).to.eql('cql_client');
           expect(event.table).to.eql('event_dummy');
+          success = true;
           done();
         });
         conn.query('create table event_dummy (id text primary key, value text)', function(err) {
+          if (success) {
+            return;
+          }
           if (err) {
             return done(err);
           }

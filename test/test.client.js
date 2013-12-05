@@ -12,6 +12,8 @@ describe('Client', function() {
     options = options || {};
     var client = cql.createClient({
       hosts: ['127.0.0.1:9042'],
+      // hosts: ['192.168.35.11', '192.168.35.12'],
+      connectTimeout: 200,
       connsPerHost: options.connsPerHost || 1,
       keyspace: options.keyspace
     });
@@ -25,7 +27,7 @@ describe('Client', function() {
   before(function(done) {
     // client = new cql.createClient({ hosts: ['192.168.35.11'] });
     client = createClient();
-    client.on('ready', done);
+    client.on('connect', done);
   });
 
   before(function(done) {
@@ -50,7 +52,7 @@ describe('Client', function() {
       connsPerHost: 2,
       keyspace: 'cql_client'
     });
-    client.on('ready', done);
+    client.on('connect', done);
   });
 
 
@@ -60,6 +62,41 @@ describe('Client', function() {
 
   beforeEach(function(done) {
     client.execute("CREATE TABLE client_test (id timeuuid, value1 text, value2 int, PRIMARY KEY(id))", done);
+  });
+
+  describe('#init', function() {
+    it('should throw error without option', function(done) {
+      try {
+        new cql.Client();
+      } catch (e) {
+        expect(e).to.be.ok();
+        return done();
+      }
+      done(new Error('error should be invoked'));
+    });
+
+    it('should throw invalid consistency level', function(done) {
+      try {
+        new cql.Client({ hosts: '127.0.0.1', consistencyLevel: 'blahblah' });
+      } catch (e) {
+        expect(e).to.be.ok();
+        return done();
+      }
+      done(new Error('error should be invoked'));
+    });
+  });
+  
+  describe('#close', function() {
+    it('can close after closed', function(done) {
+      var cli = new cql.Client({hosts:'127.0.0.1'});
+      cli.on('connect', function() {
+        cli.close();
+        setImmediate(function() {
+          cli.close();
+          done();
+        });
+      });
+    });
   });
 
   describe('#execute', function() {
