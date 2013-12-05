@@ -45,7 +45,7 @@ License
 
 See [LICENSE](LICENSE)
 
-Copyright (C) Suguru Namura
+Copyright (C) CyberAgent, Inc.
 
 [cql-protocol]: <https://github.com/yukim/cql-protocol/>
 
