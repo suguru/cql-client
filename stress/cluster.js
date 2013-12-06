@@ -1,20 +1,27 @@
 
 var cql = require('../');
-var client = cql.createClient({hosts:['127.0.0.1']});
+var client = cql.createClient({hosts:['192.168.35.11','192.168.35.12','192.168.35.13']});
 var async = require('async');
 var uuid = require('node-uuid');
 
-async.series({
-  drop: function(done) {
-    client.execute('DROP KEYSPACE IF EXISTS stress_test', done);
+client.on('error', function(err) {
+  console.error("CLIENT ERROR", err);
+});
+
+async.series([
+  function(done) {
+    console.log('dropping keyspace stress_test');
+    client.execute('DROP KEYSPACE IF EXISTS stress_test', { consistencyLevel: cql.CL.ALL }, done);
   },
-  create: function(done) {
-    client.execute("CREATE KEYSPACE stress_test WITH replication={'class':'SimpleStrategy','replication_factor':1}", done);
+  function(done) {
+    console.log('creating keyspace stress_test');
+    client.execute("CREATE KEYSPACE IF NOT EXISTS stress_test WITH replication={'class':'SimpleStrategy','replication_factor':3}", { consistencyLevel: cql.CL.ALL }, done);
   },
-  table: function(done) {
-    client.execute("CREATE TABLE stress_test.stress (id uuid primary key, name text, value int)", done);
+  function(done) {
+    console.log('creating table stress');
+    client.execute("CREATE TABLE stress_test.stress (id uuid primary key, name text, value int)",{ cnsistencyLevel: cql.CL.ALL }, done);
   }
-}, function(err) {
+], function(err) {
   if (err) {
     console.error(err.message);
     client.close();
@@ -57,6 +64,7 @@ function start() {
     }, function(err, res) {
       if (err) {
         console.log('ERROR:', err.message);
+        return callback();
       }
       queue.push({});
       var row = res.step2.rows[0];

@@ -11,7 +11,8 @@ describe('Client', function() {
   var createClient = function(options) {
     options = options || {};
     var client = cql.createClient({
-      hosts: ['127.0.0.1:9042'],
+      hosts: '127.0.0.1:9042',
+      // hosts: ['127.0.0.1:9042', '127.0.0.2:9042', '127.0.0.3:9042'],
       // hosts: ['192.168.35.11', '192.168.35.12'],
       connectTimeout: 200,
       connsPerHost: options.connsPerHost || 1,
