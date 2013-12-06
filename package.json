@@ -4,9 +4,7 @@
   "description": "cassandra CQL driver uses Native Protocol v2",
   "main": "index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha --reporter tap",
-    "testcover": "istanbul test node_modules/mocha/bin/_mocha --report cobertura -- --reporter tap",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha -- report html && open coverage/index.html"
+    "test": "node_modules/.bin/mocha --reporter tap"
   },
   "keywords": [
     "cassandra", "cql", "cql3"
