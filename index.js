@@ -1,6 +1,6 @@
 
 var Client = require('./lib/client');
-var cql = require('cql-protocol');
+var protocol = require('./lib/protocol/protocol');
 
 /**
  * Create client
@@ -17,10 +17,10 @@ exports.Client = require('./lib/client');
 exports.Connection = require('./lib/connection');
 
 exports.opcodes = require('./lib/opcodes');
-exports.types = require('./lib/types');
+exports.types = require('./lib/protocol/types');
 
-exports.messages = cql.messages;
+exports.messages = protocol.messages;
 
-exports.CONSISTENCY_LEVEL = cql.CL;
-exports.CL = cql.CL;
+exports.CONSISTENCY_LEVEL = protocol.CL;
+exports.CL = protocol.CL;
 

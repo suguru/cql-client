@@ -1,4 +1,4 @@
-/* global describe,it,before,beforeEach,afterEach */
+/* global describe,it,before,beforeEach */
 
 var cql = require('../');
 var expect = require('expect.js');
@@ -64,6 +64,16 @@ describe('Client', function() {
   beforeEach(function(done) {
     client.execute("CREATE TABLE client_test (id timeuuid, value1 text, value2 int, PRIMARY KEY(id))", done);
   });
+
+  var findRow = function(rs, id) {
+    for (var i = 0; i < rs.rows.length; i++) {
+      var row = rs.rows[i];
+      if (row.id === id) {
+        return row;
+      }
+    }
+    return null;
+  };
 
   describe('#init', function() {
     it('should throw error without option', function(done) {
@@ -132,6 +142,44 @@ describe('Client', function() {
           );
         }
       );
+    });
+  });
+
+  describe('#batch', function() {
+
+    it('should do nothing without queries', function(done) {
+      client.batch().commit(done);
+    });
+
+    it('should commit without values', function(done) {
+
+      var id1 = uuid.v1();
+      var id2 = uuid.v1();
+      var id3 = uuid.v1();
+
+      client
+      .batch()
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, 'v1', 100])
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id2, 'v2', 200])
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id3, 'v3', 300])
+      .commit(function(err) {
+        if (err) {
+          return done(err);
+        }
+
+        client
+        .execute('SELECT * FROM client_test', function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.rows).to.have.length(3);
+          expect(findRow(rs, id1)).to.eql({ id: id1, value1: 'v1', value2: 100 });
+          expect(findRow(rs, id2)).to.eql({ id: id2, value1: 'v2', value2: 200 });
+          expect(findRow(rs, id3)).to.eql({ id: id3, value1: 'v3', value2: 300 });
+          done();
+        });
+      });
+
     });
   });
 });

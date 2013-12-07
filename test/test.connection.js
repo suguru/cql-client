@@ -3,7 +3,7 @@
 var Connection = require('../lib/connection');
 var expect = require('expect.js');
 var uuid = require('node-uuid');
-var types = require('../lib/types');
+var types = require('../lib/protocol/types');
 
 describe('Connection', function() {
 

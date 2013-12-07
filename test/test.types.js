@@ -1,5 +1,5 @@
 /* global describe, it */
-var types = require('../lib/types');
+var types = require('../lib/protocol/types');
 var expect = require('expect.js');
 
 describe('Types', function() {

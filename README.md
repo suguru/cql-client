@@ -10,11 +10,12 @@ Node.js driver for cassandra. The driver uses Cassandra Binary Protocol v2.
 Features
 ----------
 
-- CQL binary protocol v2
+- Support CQL binary protocol v2
 - Auto detection for cluster peers
-- Auto reconnecting connections
-- Listening events from cassandra
-- Paging large result set
+- Auto fail-over and recover connections
+- Retry queries
+- Listening events
+- Paging large result set with v2 paging state
 
 Quick start
 ----------
@@ -36,9 +37,10 @@ Usage
 TODO
 ----------
 
-- Batch
 - Result paging
+- Retry queries
 - Authentication
+- LRU cache for prepared queries
 
 License
 ----------
@@ -47,5 +49,5 @@ See [LICENSE](LICENSE)
 
 Copyright (C) CyberAgent, Inc.
 
-[cql-protocol]: <https://github.com/yukim/cql-protocol/>
+Patched cql-protocol. See [LICENSE](LICENSE.cql-protocol) and [cql-protocol](https://github.com/yukim/cql-protocol/)
 
