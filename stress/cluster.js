@@ -20,6 +20,21 @@ async.series([
   function(done) {
     console.log('creating table stress');
     client.execute("CREATE TABLE stress_test.stress (id uuid primary key, name text, value int)",{ cnsistencyLevel: cql.CL.ALL }, done);
+  },
+  function (done) {
+    client.execute("SELECT * FROM stress_test.stress", function() {
+      done();
+    });
+  },
+  function (done) {
+    client.execute("SELECT * FROM stress_test.stress", function() {
+      done();
+    });
+  },
+  function (done) {
+    client.execute("SELECT * FROM stress_test.stress", function() {
+      done();
+    });
   }
 ], function(err) {
   if (err) {
