@@ -2,99 +2,147 @@
 var types = require('../lib/protocol/types');
 var expect = require('expect.js');
 
-describe('Types', function() {
+describe('test ser/de', function() {
+  it('ascii type', function(done) {
+    var type = types.ascii,
+        serialized,
+        deserialized;
 
+    serialized = type.serialize(null);
+    expect(serialized.length).to.eql(0);
 
-  describe('#fromType', function() {
+    serialized = type.serialize('abc');
+    expect(serialized.length).to.eql(3);
+    deserialized = type.deserialize(serialized);
+    expect(deserialized).to.eql('abc');
 
-    it('should get type by string', function() {
-      expect(types.fromType('ascii')).to.be.ok();
-      expect(types.fromType('ascii').constructor.name).to.eql('TextType');
-    });
-
-    it('should get byte type by default', function() {
-      expect(types.fromType()).to.be.ok();
-      expect(types.fromType().constructor.name).to.eql('BytesType');
-    });
-
-
+    deserialized = type.deserialize(null);
+    expect(deserialized).to.eql(null);
+    done();
   });
 
-  describe('#use', function() {
+  it('bigint', function(done) {
+    var buf = types.bigint.serialize(100);
+    expect(buf.length).to.eql(8);
+    expect(types.bigint.deserialize(buf)).to.eql('100')
 
-    it('can use BytesType', function() {
-      var val = new Buffer(8);
-      var ser = types.blob.serialize(val);
-      var des = types.blob.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    // serialize java's Long.MAX_VALUE
+    buf = types.bigint.serialize('9223372036854775807');
+    expect(buf.length).to.eql(8);
+    expect(types.bigint.deserialize(buf)).to.eql('9223372036854775807');
 
-    it('can use BooleanType', function() {
-      var val = true;
-      var ser = types.boolean.serialize(val);
-      var des = types.boolean.deserialize(ser);
-      expect(des).to.eql(val);
-      val = false;
-      ser = types.boolean.serialize(val);
-      des = types.boolean.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    // serialize java's Long.MIN_VALUE
+    buf = types.bigint.serialize('-9223372036854775808');
+    expect(types.bigint.deserialize(buf)).to.eql('-9223372036854775808');
 
-    it('can use LongType', function() {
-      var val = 10000;
-      var ser = types.bigint.serialize(val);
-      var des = types.bigint.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    // null should be null
+    expect(types.bigint.deserialize(null)).to.eql(null);
 
-    it('can use FoatType', function() {
-      var val = 1000.5;
-      var ser = types.float.serialize(val);
-      var des = types.float.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    done();
+  });
 
-    it('can use Int32Type', function() {
-      var val = 1000;
-      var ser = types.int.serialize(val);
-      var des = types.int.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+  it('blob', function(done) {
+    var blob = new Buffer('abc'),
+        buf = types.blob.serialize(blob),
+        des;
+    expect(buf).to.eql(blob);
+    des = types.blob.deserialize(buf);
 
-    it('can use Timestamp type', function() {
-      var val = new Date();
-      var ser = types.timestamp.serialize(val);
-      var des = types.timestamp.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    expect(buf).to.eql(des);
+    expect(types.blob.deserialize(null)).to.eql(null);
+    done();
+  });
 
-    it('can use UUID type', function() {
-      var val = '10baa2da-24a1-47e7-a0aa-65ff301e5e92';
-      var ser = types.uuid.serialize(val);
-      var des = types.uuid.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+  it('boolean', function(done) {
+    var buf = types['boolean'].serialize(true);
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(true);
+    buf = types['boolean'].serialize(false);
+    expect(types['boolean'].deserialize(buf)).to.eql(false);
 
-    it('can use inet type', function() {
-      var val = '127.0.0.1';
-      var ser = types.inet.serialize(val);
-      var des = types.inet.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    expect(types['boolean'].deserialize(null)).to.eql(false);
 
-    it('can use TextType', function() {
-      var val = 'Text Type';
-      var ser = types.text.serialize(val);
-      var des = types.text.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+    done();
+  });
 
-    it('can use DecimalType', function() {
-      var val = '1000000.245';
-      var ser = types.decimal.serialize(val);
-      var des = types.decimal.deserialize(ser);
-      expect(des).to.eql(val);
-    });
+  it('decimal type', function(done) {
+    var type = types.decimal,
+        patterns,
+        i,
+        serialized,
+        deserialized;
 
+    serialized = type.serialize(null);
+    expect(serialized.length).to.eql(0);
+
+    patterns = ['123.456', '-123.456', '123.000', '123', '0', '0.000123', '-0.000123'];
+    for (i = 0; i < patterns.length; i++) {
+      serialized = type.serialize(patterns[i]);
+      deserialized = type.deserialize(serialized);
+      expect(deserialized).to.eql(patterns[i]);
+    }
+
+    deserialized = type.deserialize(null);
+    expect(deserialized).to.eql(null);
+    done();
+  });
+
+  it('float', function(done) {
+    var buf = types['float'].serialize(64.0);
+    expect(buf.length).to.eql(4);
+    expect(types['float'].deserialize(buf)).to.eql(64.0);
+
+    buf = types['float'].serialize(-2.5);
+    expect(types['float'].deserialize(buf)).to.eql(-2.5);
+
+    expect(types['float'].deserialize(null)).to.eql(null);
+
+    done();
+  });
+
+  it('int', function(done) {
+    var buf = types['int'].serialize(64);
+    expect(buf.length).to.eql(4);
+    expect(types['int'].deserialize(buf)).to.eql(64);
+
+    var buf = types['int'].serialize(-2);
+    expect(types['int'].deserialize(buf)).to.eql(-2);
+
+    expect(types['int'].deserialize(null)).to.eql(null);
+
+    done();
+  });
+
+  it('timestamp', function(done) {
+    var d = new Date(),
+        buf = types.timestamp.serialize(d),
+        s = types.timestamp.deserialize(buf);
+
+    expect(d).to.eql(s);
+
+    expect(function() {
+      types.timestamp.serialize('foo');
+    }).to.throwError();
+    done();
+  });
+
+  it('inet', function(done) {
+    // IPv4
+    var v4 = '10.10.10.10',
+        v6 = '2001:db8:1234::1',
+        buf = types.inet.serialize(v4),
+        addr = types.inet.deserialize(buf);
+    expect(buf.length).to.eql(4);
+    expect(v4).to.eql(addr);
+    // IPv6
+    buf = types.inet.serialize(v6);
+    expect(buf.length).to.eql(16);
+    addr = types.inet.deserialize(buf);
+    expect(v6).to.eql(addr);
+
+    expect(function() {
+      types.inet.serialize('foo');
+    }).to.throwError();
+    done();
   });
 });
