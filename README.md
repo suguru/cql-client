@@ -15,7 +15,7 @@ Features
 - Auto fail-over and recover connections
 - Retry queries
 - Listening events
-- Paging large result set with v2 paging state
+- Paging large result set using paging state
 
 Quick start
 ----------
@@ -34,11 +34,72 @@ client.execute('SELECT * FROM system.peers', function(err, rs) {
 Usage
 ----------
 
+Install library
+
+```
+npm install cql-client --save
+```
+
+Create a client
+
+```js
+var cql = require('cql-client');
+var client = cql.createClient({ hosts: ['127.0.0.1'], keyspace: 'ks' });
+```
+
+Execute queries
+
+```js
+client.execute('SELECT * FROM table', function(err, rs) {
+  rs.rows.forEach(function(row) {
+    console.log(row);
+  });
+});
+```
+
+Execute prepared queries
+
+```js
+client.execute(
+  'INSERT INTO table (id, v1, v2) VALUES (?, ?, ?)',
+  [1000, 'foo', 'bar'],
+  function(err) {
+    ...
+  }
+);
+```
+
+Batch
+
+```js
+var batch = client.batch();
+batch.add('UPDATE table SET v1 = \'100\' WHERE id = 1000');
+batch.add('UPDATE table SET v1 = ? WHERE id = ?', ['101', 1001]);
+batch.commit(function(err) {
+  ..
+});
+```
+
+Read data with cursor
+
+```js
+var cursor = client.execute('SELECT * FROM table', function(err, rs) {
+  var cursor = rs.cursor();
+  cursor.on('row', function(row) {
+    console.log(row);
+  });
+  cursor.on('error', function(err) {
+    ..
+  });
+  cursor.on('end', function() {
+    console.log('done');
+  });
+});
+```
+
 TODO
 ----------
 
-- Result paging
-- Retry queries
 - Authentication
 - LRU cache for prepared queries
 
@@ -49,5 +110,5 @@ See [LICENSE](LICENSE)
 
 Copyright (C) CyberAgent, Inc.
 
-Patched cql-protocol. See [LICENSE](LICENSE.cql-protocol) and [cql-protocol](https://github.com/yukim/cql-protocol/)
+patched cql-protocol. See [LICENSE](LICENSE.cql-protocol) and [cql-protocol](https://github.com/yukim/cql-protocol/)
 
