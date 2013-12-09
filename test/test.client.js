@@ -182,4 +182,96 @@ describe('Client', function() {
 
     });
   });
+
+  describe('#cursor', function() {
+
+    beforeEach(function(done) {
+      var sql = 'INSERT INTO client_test (id, value1, value2) VALUES (?, ?, ?)';
+      var batch = client.batch();
+      for (var i = 0; i < 100; i++) {
+        batch.add(sql, [uuid.v1(), 'value-'+i, i * 100]);
+      }
+      batch.commit(done);
+    });
+
+    it('should invoke row event', function(done) {
+      client.execute('SELECT * FROM client_test', function(err, rs) {
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(100);
+        var count = 0;
+        var cursor = rs.cursor();
+        cursor.on('row', function() {
+          count++;
+        });
+        cursor.on('error', done);
+        cursor.on('end', function() {
+          expect(count).to.eql(100);
+          done();
+        });
+      });
+    });
+
+    it('should get next result', function(done) {
+
+      var keys = {};
+
+      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(20);
+        rs.rows.forEach(function(row) {
+          expect(row).to.only.have.keys('id','value1','value2');
+          expect(keys).to.not.have.key(row.id);
+          keys[row.id] = true;
+        });
+        expect(rs.hasNext()).to.be.ok();
+        rs.next(function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.rows).to.have.length(20);
+          rs.rows.forEach(function(row) {
+            expect(row).to.only.have.keys('id','value1','value2');
+            expect(keys).to.not.have.key(row.id);
+            keys[row.id] = true;
+          });
+          expect(rs.hasNext()).to.be.ok();
+          done();
+        });
+      });
+
+    });
+
+    it('should iterate through paging', function(done) {
+
+      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(20);
+        var cursor = rs.cursor();
+        var rowCount = 0;
+        var fetchCount = 0;
+        cursor.on('fetch', function() {
+          fetchCount++;
+        });
+        cursor.on('row', function(row) {
+          expect(row).to.have.keys('id','value1','value2');
+          rowCount++;
+        });
+        cursor.on('error', done);
+        cursor.on('end', function() {
+          expect(rowCount).to.eql(100);
+          expect(fetchCount).to.eql(6);
+          done();
+        });
+      });
+
+    });
+
+  });
 });

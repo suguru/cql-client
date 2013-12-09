@@ -22,10 +22,11 @@ describe('Connection', function() {
   });
 
   beforeEach(function(done) {
-    conn.query("create keyspace cql_client with replication={'class':'SimpleStrategy','replication_factor':1}", function(err, schema) {
+    conn.query("create keyspace cql_client with replication={'class':'SimpleStrategy','replication_factor':1}", function(err, result) {
       if (err) {
         return done(err);
       }
+      var schema = result.schema;
       expect(schema.change).to.eql('CREATED');
       expect(schema.keyspace).to.eql('cql_client');
       expect(schema).to.be.ok();
@@ -42,10 +43,11 @@ describe('Connection', function() {
   });
 
   beforeEach(function(done) {
-    conn.query('create table table1 (id uuid, value1 text, value2 int, primary key (id))', function(err, schema) {
+    conn.query('create table table1 (id uuid, value1 text, value2 int, primary key (id))', function(err, result) {
       if (err) {
         return done(err);
       }
+      var schema = result.schema;
       expect(schema.change).to.eql('CREATED');
       expect(schema.keyspace).to.eql('cql_client');
       expect(schema.table).to.eql('table1');
@@ -105,10 +107,11 @@ describe('Connection', function() {
   describe('#query', function() {
 
     it('should have keyspace', function(done) {
-      conn.query("select * from system.schema_keyspaces where keyspace_name='cql_client'", function(err, rs) {
+      conn.query("select * from system.schema_keyspaces where keyspace_name='cql_client'", function(err, result) {
         if (err) {
           return done(err);
         }
+        var rs = result.resultSet;
         expect(rs).to.be.ok();
         expect(rs.rows).to.have.length(1);
         expect(rs.rows[0].keyspace_name).to.eql('cql_client');
@@ -123,10 +126,11 @@ describe('Connection', function() {
         if (err) {
           return done(err);
         }
-        conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, rs) {
+        conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, result) {
           if (err) {
             return done(err);
           }
+          var rs = result.resultSet;
           expect(rs.rows).to.have.length(1);
           expect(rs.rows[0]).to.eql({
             id: 'acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428',
@@ -143,10 +147,11 @@ describe('Connection', function() {
         if (err) {
           return done(err);
         }
-        conn.query("select id, value1, value2 from table1 where id = fca19434-620e-4dbd-ac0c-6fd3c9350a2a", function(err, rs) {
+        conn.query("select id, value1, value2 from table1 where id = fca19434-620e-4dbd-ac0c-6fd3c9350a2a", function(err, result) {
           if (err) {
             return done(err);
           }
+          var rs = result.resultSet;
           expect(rs.rows).to.have.length(1);
           expect(rs.rows[0]).to.eql({
             id: 'fca19434-620e-4dbd-ac0c-6fd3c9350a2a',
@@ -163,10 +168,11 @@ describe('Connection', function() {
         if (err) {
           return done(err);
         }
-        conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, rs) {
+        conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, result) {
           if (err) {
             return done(err);
           }
+          var rs = result.resultSet;
           expect(rs.rows).to.have.length(1);
           expect(rs.rows[0]).to.eql({
             id: 'acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428',
@@ -177,10 +183,11 @@ describe('Connection', function() {
             if (err) {
               return done(err);
             }
-            conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, rs) {
+            conn.query('select id, value1, value2 from table1 where id = acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428', function(err, result) {
               if (err) {
                 return done(err);
               }
+              var rs = result.resultSet;
               expect(rs.rows).to.have.length(0);
               done();
             });
@@ -217,10 +224,11 @@ describe('Connection', function() {
             return done(err);
           }
           conn.prepare('select * from table1 where id = ?', function(err, prepared) {
-            conn.execute(prepared.id, [ types.uuid.serialize('acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428')], function(err, rs) {
+            conn.execute(prepared.id, [ types.uuid.serialize('acec5f5e-7ce2-4e8d-94bb-a00ecd7bf428')], function(err, result) {
               if (err) {
                 return done(err);
               }
+              var rs = result.resultSet;
               expect(rs).to.be.ok();
               expect(rs.rows).to.have.length(1);
               expect(rs.rows[0]).to.eql({
@@ -259,10 +267,11 @@ describe('Connection', function() {
         if (err) {
           return done(err);
         }
-        conn.query('SELECT * FROM table1', function(err, rs) {
+        conn.query('SELECT * FROM table1', function(err, result) {
           if (err) {
             return done(err);
           }
+          var rs = result.resultSet;
           expect(rs).to.be.ok();
           expect(rs.rows).to.have.length(4);
           expect(findRow(rs, uuid1)).to.eql(
@@ -306,10 +315,11 @@ describe('Connection', function() {
           if (err) {
             return done(err);
           }
-          conn.query('SELECT * from table1', function(err, rs) {
+          conn.query('SELECT * from table1', function(err, result) {
             if (err) {
               return done(err);
             }
+            var rs = result.resultSet;
             expect(rs).to.be.ok();
             expect(rs.rows).to.have.length(3);
             expect(findRow(rs, uuid1)).to.eql(
