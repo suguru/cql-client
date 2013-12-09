@@ -1,13 +1,15 @@
 {
   "name": "cql-client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "cassandra CQL driver uses Native Protocol v2",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/mocha --reporter tap"
   },
   "keywords": [
-    "cassandra", "cql", "cql3"
+    "cassandra",
+    "cql",
+    "cql3"
   ],
   "repository": {
     "type": "git",
@@ -24,7 +26,9 @@
     "cover": "0.2.9",
     "mocha": "1.14.0"
   },
-  "engines": {"node": ">=0.10.0"},
+  "engines": {
+    "node": ">=0.10.0"
+  },
   "author": "Suguru Namura (https://github.com/suguru/)",
   "contributors": [],
   "license": "MIT"
