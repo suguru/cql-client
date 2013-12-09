@@ -102,6 +102,16 @@ describe('Connection', function() {
       });
     });
 
+    it('should emit error when socket emits error', function(done) {
+      conn.on('error', function(err) {
+        expect(err).to.be.ok();
+        expect(err.message).to.eql('No way');
+        done();
+      });
+      conn._socket.emit('error', new Error('No way'));
+      conn._socket.destroy();
+    });
+
   });
 
   describe('#query', function() {
@@ -195,6 +205,56 @@ describe('Connection', function() {
         });
       });
     });
+
+    it('should query with fewer arguments', function(done) {
+      conn.query('select * from table1', [], function(err, result) {
+        if (err) {
+          return done(err);
+        }
+        expect(result.resultSet.rows).to.have.length(0);
+        done();
+      });
+    });
+
+    it('should query with full arguments', function(done) {
+      conn.query('select * from table1', [], {}, function(err, result) {
+        if (err) {
+          return done(err);
+        }
+        expect(result.resultSet.rows).to.have.length(0);
+        done();
+      });
+    });
+
+    it('should fail when streams overflow', function(done) {
+      // make empty streamid
+      var check = function(err) {
+        expect(err).to.be.ok();
+        expect(err._closed).to.be.ok();
+      };
+      var nothing = function() {};
+      var i = 0;
+      for (i = 0; i < 127; i++) {
+        conn.getAvailableStreamId(nothing);
+      }
+      expect(conn._streamIds).to.have.length(0);
+      conn.getAvailableStreamId(function(err, streamId) {
+        if (err) {
+          return done(err);
+        }
+        expect(streamId).to.eql(10);
+        done();
+      });
+      for (i = 1; i < conn._maxWaitPerConns; i++) {
+        conn.getAvailableStreamId(check);
+        expect(conn._streamWaitQueue).to.have.length(i+1);
+      }
+      conn.getAvailableStreamId(function(err) {
+        expect(err).to.be.ok();
+        expect(err.message).to.eql('Too many requests. Increase connection size to execute more concurrent queries.');
+        conn.releaseStreamId(10);
+      });
+    });
   });
 
   describe('#prepare', function() {
@@ -239,6 +299,20 @@ describe('Connection', function() {
               done();
             });
           });
+        });
+      });
+    });
+    it('should execute with fewer arguments', function(done) {
+      conn.prepare('SELECT * FROM table1', function(err, prepared) {
+        if (err) {
+          return done(err);
+        }
+        conn.execute(prepared.id, function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.resultSet.rows).to.have.length(0);
+          done();
         });
       });
     });

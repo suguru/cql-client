@@ -95,6 +95,13 @@ describe('Client', function() {
       }
       done(new Error('error should be invoked'));
     });
+
+    it('should connect with auto detect', function(done) {
+      var cli = new cql.Client({ host: '127.0.0.1', autoDetect: true });
+      cli.on('connect', function() {
+        done();
+      });
+    });
   });
   
   describe('#close', function() {
@@ -142,6 +149,50 @@ describe('Client', function() {
           );
         }
       );
+    });
+
+    it('should prepare again when unprepared', function(done) {
+
+      var query = 'SELECT * FROM client_test';
+
+      client.execute(query, [], function(err) {
+        if (err) {
+          return done(err);
+        }
+        var conn = client._conns[0];
+        expect(conn._preparedMap).to.have.key(query);
+        expect(conn.unprepare(query));
+        expect(conn._preparedMap).to.not.have.key(query);
+
+        client.execute(query, [], function(err, rs) {
+          expect(conn._preparedMap).to.have.key(query);
+          expect(rs.rows).to.have.length(0);
+          done();
+        });
+      });
+
+    });
+
+    it('should prepare again when unprepared on cassandra', function(done) {
+
+      var query = 'SELECT * FROM client_test';
+
+      client.execute(query, [], function(err) {
+        if (err) {
+          return done(err);
+        }
+        var conn = client._conns[0];
+        expect(conn._preparedMap).to.have.key(query);
+        var prepared = conn._preparedMap[query];
+        // modify to simulate unprepared query
+        prepared.id[0]++;
+        client.execute(query, [], function(err, rs) {
+          expect(conn._preparedMap).to.have.key(query);
+          expect(rs.rows).to.have.length(0);
+          done();
+        });
+      });
+
     });
   });
 
@@ -245,6 +296,22 @@ describe('Client', function() {
 
     });
 
+    it('should fail with next', function(done) {
+
+      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+        if (err) {
+          return done(err);
+        }
+        // simulate error with bad query
+        rs.query = 'SELECT * FROM client_invalid';
+        rs.next(function(err) {
+          expect(err).to.be.ok();
+          done();
+        });
+      });
+
+    });
+
     it('should iterate through paging', function(done) {
 
       client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
@@ -273,5 +340,79 @@ describe('Client', function() {
 
     });
 
+    it('should iterate through paging with prepared query', function(done) {
+      client.execute('SELECT * FROM client_test LIMIT 41', function(err, rs) {
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(41);
+        var firstId = rs.rows[0].id;
+        var firstRows = rs.rows;
+        client.execute(
+          'SELECT * FROM client_test WHERE token(id) > token(?)',
+          [firstId],
+          { pageSize: 20 },
+          function(err, rs) {
+            if (err) {
+              return done(err);
+            }
+            for (var i = 0; i < rs.rows.length; i++) {
+              expect(rs.rows[i].id).to.eql(firstRows[i+1].id);
+            }
+            rs.next(function(err, rs) {
+              if (err) {
+                return done(err);
+              }
+              expect(rs.rows).to.have.length(20);
+              for (var i = 0; i < rs.rows.length; i++) {
+                expect(rs.rows[i].id).to.eql(firstRows[i+21].id);
+              }
+              done();
+            });
+          });
+      });
+    });
+
+    it('should fail with prepared query', function(done) {
+      client.execute('SELECT * FROM client_test LIMIT 1', function(err, rs) {
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(1);
+        client.execute(
+          'SELECT * FROM client_test WHERE token(id) > token(?)',
+          [rs.rows[0].id],
+          { pageSize: 20 },
+          function(err, rs) {
+            if (err) {
+              return done(err);
+            }
+            // simulate error with bad paging state
+            rs.metadata.pagingState[0]++;
+            rs.next(function(err) {
+              expect(err).to.be.ok();
+              done();
+            });
+          }
+        );
+      });
+    });
+
+    it('should fail while caused error', function(done) {
+      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+
+        if (err) {
+          return done(err);
+        }
+        expect(rs.rows).to.have.length(20);
+        // simulate error with bad query
+        rs.query = 'SELECT * FROM client_bad';
+        var cursor = rs.cursor();
+        cursor.on('error', function(err) {
+          expect(err).to.be.ok();
+          done();
+        });
+      });
+    });
   });
 });
