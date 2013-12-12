@@ -3,9 +3,7 @@ cql-client
 
 [![Build Status](https://travis-ci.org/suguru/cql-client.png)](https://travis-ci.org/suguru/cql-client)
 
-Node.js driver for cassandra. The driver uses Cassandra Binary Protocol v2.
-
-**NOTICE** This module is *NOT* ready for production use yet.
+Node.js driver for cassandra on Cassandra Binary Protocol v2.
 
 Features
 ----------
@@ -13,8 +11,8 @@ Features
 - Support CQL binary protocol v2
 - Auto detection for cluster peers
 - Auto fail-over and recover connections
-- Retry queries
-- Listening events
+- Retry queries when disconnected from servers
+- Listening server events
 - Paging large result set using paging state
 
 Quick start
@@ -27,7 +25,11 @@ var client = require('cql-client').createClient({
 
 client.execute('SELECT * FROM system.peers', function(err, rs) {
   var rows = rs.rows;
-  ..
+  rows.forEach(function(row) {
+    console.log(row.peer);
+    console.log(row.host_id);
+    ..
+  });
 });
 ```
 
@@ -73,8 +75,9 @@ Batch
 
 ```js
 var batch = client.batch();
-batch.add('UPDATE table SET v1 = \'100\' WHERE id = 1000');
 batch.add('UPDATE table SET v1 = ? WHERE id = ?', ['101', 1001]);
+batch.add('UPDATE table SET v1 = ? WHERE id = ?', ['101', 1001]);
+batch.add('DELETE FROM table WHERE id = ?', ['102']);
 batch.commit(function(err) {
   ..
 });
@@ -108,7 +111,7 @@ License
 
 See [LICENSE](LICENSE)
 
-Copyright (C) CyberAgent, Inc.
+Copyright (C) Suguru Namura
 
 patched cql-protocol. See [LICENSE](LICENSE.cql-protocol) and [cql-protocol](https://github.com/yukim/cql-protocol/)
 
