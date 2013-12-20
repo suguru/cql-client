@@ -165,6 +165,9 @@ describe('Client', function() {
         expect(conn._preparedMap).to.not.have.key(query);
 
         client.execute(query, [], function(err, rs) {
+          if (err) {
+            return done(err);
+          }
           expect(conn._preparedMap).to.have.key(query);
           expect(rs.rows).to.have.length(0);
           done();
