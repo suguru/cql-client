@@ -317,12 +317,14 @@ describe('Client', function() {
 
     it('should iterate through paging', function(done) {
 
-      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+      var pageSize = 20;
+      var fetchSize = Math.ceil(100 / pageSize);
 
+      client.execute('SELECT * FROM client_test', { pageSize: pageSize }, function(err, rs) {
         if (err) {
           return done(err);
         }
-        expect(rs.rows).to.have.length(20);
+        expect(rs.rows).to.have.length(pageSize);
         var cursor = rs.cursor();
         var rowCount = 0;
         var fetchCount = 0;
@@ -336,7 +338,7 @@ describe('Client', function() {
         cursor.on('error', done);
         cursor.on('end', function() {
           expect(rowCount).to.eql(100);
-          expect(fetchCount).to.eql(6);
+          expect(fetchCount).to.eql(fetchSize);
           done();
         });
       });
