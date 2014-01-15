@@ -49,6 +49,15 @@ var cql = require('cql-client');
 var client = cql.createClient({ hosts: ['127.0.0.1'], keyspace: 'ks' });
 ```
 
+Connection options
+
+* `hosts`: List of cassandra hosts you are connecting to. Use array to connect multiple hosts.
+* `keyspace`: Name of the default keyspace.
+* `autoDetect`: Set true to detect peers automatically. (Optional)
+* `connsPerHost`: The size of connection pool per host. (Default: 2)
+* `connectTimeout`: Milliseconds to determine connections are timed out. (Default: 5000)
+* `reconnectInterval`: Milliseconds of interval for reconnecting. (Default: 5000)
+
 Execute queries
 
 ```js
