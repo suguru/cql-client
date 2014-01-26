@@ -8,12 +8,12 @@ Node.js driver for cassandra on Cassandra Binary Protocol v2.
 Features
 ----------
 
-- Support CQL binary protocol v2
-- Auto detection for cluster peers
-- Auto fail-over and recover connections
+- CQL binary protocol v2
+- Automatic discovery of cluster peers
+- Fail-over cluster peers
 - Retry queries when disconnected from servers
-- Listening server events
-- Paging large result set using paging state
+- Paging large result set with paging state
+- Events
 
 Quick start
 ----------
@@ -48,15 +48,6 @@ Create a client
 var cql = require('cql-client');
 var client = cql.createClient({ hosts: ['127.0.0.1'], keyspace: 'ks' });
 ```
-
-Connection options
-
-* `hosts`: List of cassandra hosts you are connecting to. Use array to connect multiple hosts.
-* `keyspace`: Name of the default keyspace.
-* `autoDetect`: Set true to detect peers automatically. (Optional)
-* `connsPerHost`: The size of connection pool per host. (Default: 2)
-* `connectTimeout`: Milliseconds to determine connections are timed out. (Default: 5000)
-* `reconnectInterval`: Milliseconds of interval for reconnecting. (Default: 5000)
 
 Execute queries
 
@@ -108,6 +99,105 @@ var cursor = client.execute('SELECT * FROM table', function(err, rs) {
   });
 });
 ```
+API
+----------
+
+### CQL
+
+#### cql.createClient([options])
+
+Create a client with options. The created client will connect the cluster automatically.
+
+* `options`
+ * `hosts` List of cassandra hosts you are connecting to. Use array to connect multiple hosts.
+ * `keyspace` Name of the default keyspace.
+ * `autoDetect` Set true to detect peers automatically. (Optional)
+ * `connsPerHost` The size of connection pool per host. (Default: 2)
+ * `connectTimeout` Milliseconds to determine connections are timed out. (Default: 5000)
+ * `reconnectInterval` Milliseconds of interval for reconnecting. (Default: 5000)
+
+### Client
+
+#### client.connect(cb)
+
+Connect to the cluster. Note that you do not need to call the method since client will connect automatically.
+
+* `cb` callback when connected
+
+#### client.close()
+
+Close the connection to the cluster.
+
+#### client.getAvailableConnection()
+
+Get available connection from connections.
+
+#### client.execute(query, [values], [options], callback)
+
+Execute CQL. It will use prepared query when values are specified.
+
+* `query` Query statement to be executed.
+* `values` Array of bound values.
+* `options`
+ * `consistencyLevel` Consistency level of the query. cql.CL.ONE,THREE,QUORUM,ALL,LOCAL_QUORUM,EACH_QUORUM
+ * `pageSize` Paging size of the result.
+ * `pagingState` Paging state of the query.
+ * `serialConsistency` Serial consistency of the query.
+* `callback` Callback with error and result set.
+
+#### client.batch()
+
+Create batch instance. See Batch.
+
+### ResultSet
+
+Result data of the query.
+
+#### resultSet.metadata
+
+Metadata of result rows and columns.
+
+#### resultSet.rows
+
+Array of rows.
+
+#### resultSet.cursor()
+
+Create cursor instance of the result.
+
+### Cursor
+
+#### cursor.on(event, listener)
+
+Register event listener.
+
+* Events
+ * `row` when cursor have an available row
+ * `end` when cursor ends
+ * `error` when error occurs
+
+#### cursor.abort()
+
+Abort cursor. It will fire `end` event.
+
+### Batch
+
+#### batch.add(query, [values])
+
+Add query to the batch.
+
+* `query` Query statement.
+* `values` Array of values to be bound.
+
+#### batch.option(options)
+
+Set option parameters to the batch.
+
+* `options` Same as options of client.execute()
+
+#### batch.commit(callback)
+
+Commit queries. It will clean up queries in the batch after committing.
 
 TODO
 ----------
