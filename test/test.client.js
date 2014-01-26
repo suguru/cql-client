@@ -407,7 +407,6 @@ describe('Client', function() {
 
     it('should fail while caused error', function(done) {
       client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
-
         if (err) {
           return done(err);
         }
@@ -417,6 +416,26 @@ describe('Client', function() {
         var cursor = rs.cursor();
         cursor.on('error', function(err) {
           expect(err).to.be.ok();
+          done();
+        });
+      });
+    });
+
+    it('should ends immediate when aborted', function(done) {
+      client.execute('SELECT * FROM client_test', { pageSize: 20 }, function(err, rs) {
+        var count = 0;
+        if (err) {
+          return done(err);
+        }
+        var cursor = rs.cursor();
+        cursor.on('row', function() {
+          count++;
+          if (count === 25) {
+            cursor.abort();
+          }
+        });
+        cursor.on('end', function() {
+          expect(count).to.eql(25);
           done();
         });
       });
