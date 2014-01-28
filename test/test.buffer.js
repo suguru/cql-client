@@ -36,13 +36,20 @@ describe('Buffer', function() {
   });
 
   it('test read/write short', function() {
-    var n = 2,
-    buf = new Buf();
 
-    buf.writeShort(n);
-    buf.rewind();
-    expect(buf.readShort()).to.eql(n);
+    // short mean unsigned short in cassandra protocol
+    [0,1,100,32767,65535].forEach(function(n) {
+      buf = new Buf();
+      buf.writeShort(n);
+      buf.rewind();
+      expect(buf.readShort()).to.eql(n);
+    });
+
     expect(function() { buf.writeShort('100'); }).to.throwError();
+    // overflow
+    expect(function() { buf.writeShort(65536); }).to.throwError();
+    expect(function() { buf.writeShort(-1); }).to.throwError();
+    expect(function() { buf.writeShort(-32727); }).to.throwError();
 
     buf = new Buf();
     buf.writeByte(-1);
@@ -54,12 +61,13 @@ describe('Buffer', function() {
   });
 
   it('test read/write int', function() {
-    var n = 2,
-    buf = new Buf();
+    [-0x7ffff, -100000, -1, 0, 1, 100000, 0x7ffff].forEach(function(n) {
+      buf = new Buf();
+      buf.writeInt(n);
+      buf.rewind();
+      expect(n).to.eql(buf.readInt());
+    });
 
-    buf.writeInt(n);
-    buf.rewind();
-    expect(n).to.eql(buf.readInt());
     expect(function() { buf.writeInt('100'); }).to.throwError();
     expect(function() { buf.writeUInt('100'); }).to.throwError();
   });
