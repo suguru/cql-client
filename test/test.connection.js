@@ -234,7 +234,7 @@ describe('Connection', function() {
       };
       var nothing = function() {};
       var i = 0;
-      for (i = 0; i < 127; i++) {
+      for (i = 0; i < 100; i++) {
         conn.getAvailableStreamId(nothing);
       }
       expect(conn._streamIds).to.have.length(0);
