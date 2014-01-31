@@ -160,15 +160,15 @@ describe('Client', function() {
           return done(err);
         }
         var conn = client._conns[0];
-        expect(conn._preparedMap).to.have.key(query);
+        expect(conn._preparedCache.has(query)).to.be(true);
         expect(conn.unprepare(query));
-        expect(conn._preparedMap).to.not.have.key(query);
+        expect(conn._preparedCache.has(query)).to.be(false);
 
         client.execute(query, [], function(err, rs) {
           if (err) {
             return done(err);
           }
-          expect(conn._preparedMap).to.have.key(query);
+          expect(conn._preparedCache.has(query)).to.be(true);
           expect(rs.rows).to.have.length(0);
           done();
         });
@@ -185,12 +185,12 @@ describe('Client', function() {
           return done(err);
         }
         var conn = client._conns[0];
-        expect(conn._preparedMap).to.have.key(query);
-        var prepared = conn._preparedMap[query];
+        expect(conn._preparedCache.has(query)).to.be(true);
+        var prepared = conn._preparedCache.get(query);
         // modify to simulate unprepared query
         prepared.id[0]++;
         client.execute(query, [], function(err, rs) {
-          expect(conn._preparedMap).to.have.key(query);
+          expect(conn._preparedCache.has(query)).to.be(true);
           expect(rs.rows).to.have.length(0);
           done();
         });

@@ -115,6 +115,7 @@ Create a client with options. The created client will connect the cluster automa
  * `connsPerHost` The size of connection pool per host. (Default: 2)
  * `connectTimeout` Milliseconds to determine connections are timed out. (Default: 5000)
  * `reconnectInterval` Milliseconds of interval for reconnecting. (Default: 5000)
+ * `preparedCacheSize` Size of cache for prepared statement. (Default: 10000)
 
 ### Client
 
@@ -203,7 +204,6 @@ TODO
 ----------
 
 - Authentication
-- LRU cache for prepared queries
 
 License
 ----------

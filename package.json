@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "async": "0.2.9",
+    "lru-cache": "2.5.0",
     "node-uuid": "1.4.1",
     "ipaddr.js": "0.1.2",
     "jsbn": "0.0.0"
