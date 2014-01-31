@@ -62,6 +62,26 @@ describe('test ser/de', function() {
 
     expect(types['boolean'].deserialize(null)).to.eql(false);
 
+    buf = types['boolean'].serialize(1);
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(true);
+
+    buf = types['boolean'].serialize(0);
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(false);
+
+    buf = types['boolean'].serialize('true');
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(true);
+
+    buf = types['boolean'].serialize('1');
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(true);
+
+    buf = types['boolean'].serialize('false');
+    expect(buf.length).to.eql(1);
+    expect(types['boolean'].deserialize(buf)).to.eql(false);
+
     done();
   });
 
@@ -105,7 +125,14 @@ describe('test ser/de', function() {
     expect(buf.length).to.eql(4);
     expect(types['int'].deserialize(buf)).to.eql(64);
 
-    var buf = types['int'].serialize(-2);
+    buf = types['int'].serialize(-2);
+    expect(types['int'].deserialize(buf)).to.eql(-2);
+
+    buf = types['int'].serialize('64');
+    expect(buf.length).to.eql(4);
+    expect(types['int'].deserialize(buf)).to.eql(64);
+
+    buf = types['int'].serialize('-2');
     expect(types['int'].deserialize(buf)).to.eql(-2);
 
     expect(types['int'].deserialize(null)).to.eql(null);
@@ -120,9 +147,18 @@ describe('test ser/de', function() {
 
     expect(d).to.eql(s);
 
+    buf = types.timestamp.serialize(d.toString());
+    s = types.timestamp.deserialize(buf);
+    expect(d.toString()).to.eql(s.toString());
+
+    buf = types.timestamp.serialize(d.getTime());
+    s = types.timestamp.deserialize(buf);
+    expect(d).to.eql(s);
+
     expect(function() {
       types.timestamp.serialize('foo');
     }).to.throwError();
+
     done();
   });
 
