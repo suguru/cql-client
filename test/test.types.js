@@ -117,6 +117,49 @@ describe('test ser/de', function() {
 
     expect(types['float'].deserialize(null)).to.eql(null);
 
+    buf = types['float'].serialize('64');
+    expect(buf.length).to.eql(4);
+    expect(types['float'].deserialize(buf)).to.eql(64);
+
+    buf = types['float'].serialize('255.35');
+    expect(buf.length).to.eql(4);
+    expect(Math.floor(types['float'].deserialize(buf)*100)).to.eql(25535);
+
+    expect(function() {
+      types['float'].serialize(null);
+    }).to.throwError();
+    expect(function() {
+      types['float'].serialize('string');
+    }).to.throwError();
+
+    done();
+  });
+
+  it('double', function(done) {
+    var buf = types['double'].serialize(64.0);
+    expect(buf.length).to.eql(8);
+    expect(types['double'].deserialize(buf)).to.eql(64.0);
+
+    buf = types['double'].serialize(-2.5);
+    expect(types['double'].deserialize(buf)).to.eql(-2.5);
+
+    expect(types['double'].deserialize(null)).to.eql(null);
+
+    buf = types['double'].serialize('64');
+    expect(buf.length).to.eql(8);
+    expect(types['double'].deserialize(buf)).to.eql(64);
+
+    buf = types['double'].serialize('255.35');
+    expect(buf.length).to.eql(8);
+    expect(Math.floor(types['double'].deserialize(buf)*100)).to.eql(25535);
+
+    expect(function() {
+      types['double'].serialize(null);
+    }).to.throwError();
+    expect(function() {
+      types['double'].serialize('string');
+    }).to.throwError();
+
     done();
   });
 
@@ -136,6 +179,13 @@ describe('test ser/de', function() {
     expect(types['int'].deserialize(buf)).to.eql(-2);
 
     expect(types['int'].deserialize(null)).to.eql(null);
+
+    expect(function() {
+      types['int'].serialize(null);
+    }).to.throwError();
+    expect(function() {
+      types['int'].serialize('string');
+    }).to.throwError();
 
     done();
   });
