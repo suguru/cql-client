@@ -16,7 +16,7 @@
     "url": "https://github.com/suguru/cql-client.git"
   },
   "dependencies": {
-    "async": "0.2.9",
+    "async": "0.2.10",
     "lru-cache": "2.5.0",
     "node-uuid": "1.4.1",
     "ipaddr.js": "0.1.2",
