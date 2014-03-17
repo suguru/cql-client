@@ -23,9 +23,16 @@
     "jsbn": "0.0.0"
   },
   "devDependencies": {
-    "expect.js": "0.2.0",
-    "cover": "0.2.9",
-    "mocha": "1.14.0"
+    "expect.js": "^0.2.0",
+    "mocha": "^1.14.0",
+    "mocha-lcov-reporter": "^0.0.1",
+    "coveralls": "^2.8.0",
+    "istanbul": "^0.2.6"
+  },
+  "config": {
+    "blanket": {
+      "pattern": "/lib/"
+    }
   },
   "engines": {
     "node": ">=0.10.0"
