@@ -235,6 +235,63 @@ describe('Client', function() {
       });
 
     });
+
+    it('should override insert value', function(done) {
+
+      var id1 = uuid.v1();
+
+      client
+      .batch()
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, 'v1', 100])
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, 'v11', 200])
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, 'v111', 300])
+      .commit(function(err) {
+        if (err) {
+          return done(err);
+        }
+
+        client
+        .execute('SELECT * FROM client_test', function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.rows).to.have.length(1);
+          expect(findRow(rs, id1)).to.eql({ id: id1, value1: 'v111', value2: 300 });
+          done();
+        });
+      });
+
+    });
+
+    it('should override with large batch commits', function(done) {
+
+      var id1 = uuid.v1();
+
+      var batch = client.batch();
+
+      var text = 'test';
+      for (var i = 0; i < 100; i++) {
+        text = text + '1234567890123456789012345678901234567890';
+        batch.add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, text, i]);
+      }
+      batch.commit(function(err) {
+        if (err) {
+          return done(err);
+        }
+
+        client
+        .execute('SELECT * FROM client_test', function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.rows).to.have.length(1);
+          expect(findRow(rs, id1)).to.eql({ id: id1, value1: text, value2: 99 });
+          done();
+        });
+      });
+
+    });
+
   });
 
   describe('#cursor', function() {
