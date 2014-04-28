@@ -3,9 +3,15 @@ var cql = require('../');
 var client = cql.createClient({hosts:['192.168.35.11','192.168.35.12','192.168.35.13']});
 var async = require('async');
 var uuid = require('node-uuid');
-
+/*
 client.on('error', function(err) {
   console.error("CLIENT ERROR", err);
+});
+*/
+client.on('log', function(level, msg, args) {
+  if (level !== 'debug') {
+    console.log("LOG", level, msg, args);
+  }
 });
 
 async.series([
