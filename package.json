@@ -1,6 +1,6 @@
 {
   "name": "cql-client",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "cassandra CQL driver uses Native Protocol v2",
   "main": "index.js",
   "scripts": {
