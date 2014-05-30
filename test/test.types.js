@@ -60,7 +60,7 @@ describe('test ser/de', function() {
     buf = types['boolean'].serialize(false);
     expect(types['boolean'].deserialize(buf)).to.eql(false);
 
-    expect(types['boolean'].deserialize(null)).to.eql(false);
+    expect(types['boolean'].deserialize(null)).to.eql(null);
 
     buf = types['boolean'].serialize(1);
     expect(buf.length).to.eql(1);
