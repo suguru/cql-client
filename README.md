@@ -1,8 +1,8 @@
 cql-client
 ==========
 
-[![Build Status](https://travis-ci.org/suguru/cql-client.png)](https://travis-ci.org/suguru/cql-client)
-[![Coverage Status](https://coveralls.io/repos/suguru/cql-client/badge.png)](https://coveralls.io/r/suguru/cql-client)
+[![Build Status](https://img.shields.io/travis/suguru/cql-client.svg?style=flat)](https://travis-ci.org/suguru/cql-client)
+[![Coverage Status](https://img.shields.io/coveralls/suguru/cql-client.svg?style=flat)](https://coveralls.io/r/suguru/cql-client)
 
 Node.js driver for cassandra on Cassandra Binary Protocol v2.
 
