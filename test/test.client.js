@@ -103,7 +103,7 @@ describe('Client', function() {
       });
     });
   });
-  
+
   describe('#close', function() {
     it('can close after closed', function(done) {
       var cli = new cql.Client({hosts:'127.0.0.1'});
@@ -291,6 +291,54 @@ describe('Client', function() {
       });
 
     });
+
+    it('should commit again when unprepared', function(done) {
+
+      // stub
+      client._conns.forEach(function(conn) {
+        var count = 0;
+        var batch = conn.batch;
+        var unprepared = 0x2500;
+        conn.batch = function(list, options, callback) {
+
+          if (typeof options === 'function') {
+            callback = options;
+            options = {};
+          } else {
+            options = options || {};
+          }
+
+          if (count++ === 0) {
+            return callback({ code: unprepared });
+          }
+
+          batch.call(conn, list, options, callback);
+        };
+      });
+
+      var id1 = uuid.v1();
+
+      client
+      .batch()
+      .add('INSERT INTO client_test (id,value1,value2) VALUES (?,?,?)', [id1, 'v1', 100])
+      .commit(function(err) {
+        if (err) {
+          return done(err);
+        }
+
+        client
+        .execute('SELECT * FROM client_test', function(err, rs) {
+          if (err) {
+            return done(err);
+          }
+          expect(rs.rows).to.have.length(1);
+          expect(findRow(rs, id1)).to.eql({ id: id1, value1: 'v1', value2: 100 });
+          done();
+        });
+      });
+
+    });
+
 
   });
 
