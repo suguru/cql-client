@@ -3,6 +3,7 @@ cql-client
 
 [![Build Status](https://img.shields.io/travis/suguru/cql-client.svg?style=flat)](https://travis-ci.org/suguru/cql-client)
 [![Coverage Status](https://img.shields.io/coveralls/suguru/cql-client.svg?style=flat)](https://coveralls.io/r/suguru/cql-client)
+[![Coverage Status](http://img.shields.io/codecov/c/github/suguru/cql-client.svg?style=flat)](https://codecov.io/github/suguru/cql-client)
 [![npm](http://img.shields.io/npm/v/cql-client.svg?style=flat)](https://www.npmjs.org/package/cql-client)
 [![license](http://img.shields.io/npm/l/express.svg?style=flat)](https://www.npmjs.org/package/cql-client)
 

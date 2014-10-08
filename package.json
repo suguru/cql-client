@@ -23,11 +23,11 @@
     "jsbn": "0.0.0"
   },
   "devDependencies": {
+    "codecov.io": "0.0.2",
     "expect.js": "^0.2.0",
+    "istanbul": "^0.2.6",
     "mocha": "^1.14.0",
-    "mocha-lcov-reporter": "^0.0.1",
-    "coveralls": "^2.8.0",
-    "istanbul": "^0.2.6"
+    "mocha-lcov-reporter": "^0.0.1"
   },
   "config": {
     "blanket": {
