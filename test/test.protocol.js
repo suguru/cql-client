@@ -10,6 +10,17 @@ describe('test ser/de messages', function() {
 
   serde.pipe(serde);
 
+  if (!serde.listeners('readable').length) {
+    serde.on('readable', function() {
+      var state = serde._readableState;
+      state.ranOut = false;
+      var chunk;
+      do {
+        chunk = serde.read();
+      } while (null !== chunk && state.flowing);
+    });
+  }
+
   it('messages.Error', function(done) {
     var message = new protocol.messages.Error(0x0000, 'Server error');
     expect(message.opcode).to.eql(0x00)
