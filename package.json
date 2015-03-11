@@ -26,7 +26,7 @@
     "codecov.io": "0.0.2",
     "expect.js": "^0.2.0",
     "istanbul": "^0.2.6",
-    "mocha": "^1.14.0",
+    "mocha": "^2.1.0",
     "mocha-lcov-reporter": "^0.0.1"
   },
   "config": {
